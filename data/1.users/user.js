@@ -5,7 +5,7 @@ const ObjectID = require('mongodb').ObjectID;
 const items = [
   {
     _id: new ObjectID(to24DigitObjectId(leadingObjectId.user, 0)),
-    firstName: 'Nauman',
+    firstName: 'Ahmed',
     lastName: 'Admin',
     email: 'test@gmail.com',
     password: '$2a$05$ZrJ7kt//B1lGEqvt8hk8qePL5ZdcyrUsZ6egzpKyDUgZvKpvGmr7.',
@@ -16,14 +16,14 @@ const items = [
   },
   {
     _id: new ObjectID(to24DigitObjectId(leadingObjectId.user, 1)),
-    firstName: 'Nauman',
-    lastName: 'Requester',
+    firstName: 'Ahmed',
+    lastName: 'Seeker',
     countryCode: '+1',
     phoneNumber: '3335421471',
-    email: 'test@gmail.com',
+    email: 'test+seeker@gmail.com',
     isEmailVerified: true,
     password: '$2a$05$ZrJ7kt//B1lGEqvt8hk8qePL5ZdcyrUsZ6egzpKyDUgZvKpvGmr7.',
-    role: Roles.Requester,
+    role: Roles.Seeker,
     stripeCustomerId: 'cus_G8iwRvF1lr9v7C',
     status: Status.Active,
     createdAt: faker.date.past(),
@@ -31,35 +31,19 @@ const items = [
   },
   {
     _id: new ObjectID(to24DigitObjectId(leadingObjectId.user, 2)),
-    firstName: 'Nauman',
-    lastName: 'Manager',
+    firstName: 'Ahmed',
+    lastName: 'Giver',
     countryCode: '+1',
     phoneNumber: '3335421473',
-    email: 'test@gmail.com',
+    email: 'test+giver@gmail.com',
     isEmailVerified: true,
     password: '$2a$05$ZrJ7kt//B1lGEqvt8hk8qePL5ZdcyrUsZ6egzpKyDUgZvKpvGmr7.',
-    role: Roles.Manager,
-    serviceAreas: [new ObjectID(to24DigitObjectId(leadingObjectId.serviceArea, 0))],
+    role: Roles.Giver,
     status: Status.Active,
     createdAt: faker.date.past(),
     updatedAt: faker.date.recent()
   },
-  {
-    _id: new ObjectID(to24DigitObjectId(leadingObjectId.user, 3)),
-    firstName: 'Nauman',
-    lastName: 'Provider',
-    countryCode: '+1',
-    phoneNumber: '3335421472',
-    email: 'test@gmail.com',
-    isEmailVerified: true,
-    password: '$2a$05$ZrJ7kt//B1lGEqvt8hk8qePL5ZdcyrUsZ6egzpKyDUgZvKpvGmr7.',
-    role: Roles.Provider,
-    serviceAreas: [new ObjectID(to24DigitObjectId(leadingObjectId.serviceArea, 0))],
-    stripeCustomerId: 'cus_G8iaQfVpDj1U8j',
-    status: Status.Active,
-    createdAt: faker.date.past(),
-    updatedAt: faker.date.recent()
-  }
+
 ];
 
 module.exports = items;

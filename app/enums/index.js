@@ -32,9 +32,8 @@ const Status = Object.freeze({
 const Roles = Object.freeze({
   SuperAdmin: 'super_admin',
   Admin: 'admin',
-  Requester: 'customer',
-  Manager: 'tech',
-  Provider: 'provider'
+  Seeker: 'seeker',
+  Giver: 'giver',
 });
 
 const NotificationTypes = Object.freeze({
