@@ -89,5 +89,4 @@ require('./app/events/socket.events')(io);
 
 // Requiring All Event listeners
 require('./app/events');
-
 module.exports = app; // for testing

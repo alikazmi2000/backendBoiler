@@ -15,7 +15,6 @@ const UserSchema = new mongoose.Schema(
       type: String,
       validate: { validator: validator.isEmail, message: 'EMAIL_IS_NOT_VALID' },
       lowercase: true,
-      required: true
     }, // Email Address of the User
     isEmailVerified: { type: Boolean, default: false }, // Either Email is verified or not
     password: { type: String, required: true }, // Password of the User's Account

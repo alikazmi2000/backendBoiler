@@ -22,6 +22,7 @@ module.exports = () => {
         }
         if (process.env.NODE_ENV !== 'test') {
           // Prints initialization
+          console.log('asdasd',process.env.URL,process.env.API_BASE_ROUTE)
           console.log(
             `Started server using port "${process.env.PORT || 3000}"` +
               `, environment "${process.env.NODE_ENV}" ` +

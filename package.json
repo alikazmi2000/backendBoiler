@@ -23,8 +23,7 @@
     "dummy": "node dummy.js"
   },
   "husky": {
-    "hooks": {
-    }
+    "hooks": {}
   },
   "dependencies": {
     "@sendgrid/mail": "^6.4.0",

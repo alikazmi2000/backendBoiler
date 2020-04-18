@@ -1,5 +1,5 @@
 const userCtrl = require('../controllers/users');
-// const userValidate = require('../validations/users.validate');
+const userValidate = require('../validations/users.validate');
 const { Roles } = require('../enums');
 const express = require('express');
 const router = express.Router();
@@ -12,6 +12,44 @@ const requireAuth = (req, res, next) => {
   })(req, res, next);
 };
 const trimRequest = require('trim-request');
+
+
+/*
+ ******************
+ * User Auth routes
+ ******************
+ */
+
+/*
+ * SignUp route
+ */
+router.post(
+  '/signup',
+  trimRequest.all,
+  userValidate.signup,
+  userCtrl.signUp
+);
+
+/*
+ * Verify Phone route
+ */
+router.post(
+  '/verify_phone',
+  trimRequest.all,
+  userValidate.verifyPhone,
+  userCtrl.verifyPhone
+  );
+
+
+/*
+ * Verify OTP code route
+ */
+router.post(
+  '/verify_otp_code',
+  trimRequest.all,
+  userValidate.verifyOTPCode,
+  userCtrl.verifyOTPCode
+);
 
 
 module.exports = router;

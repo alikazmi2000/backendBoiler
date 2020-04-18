@@ -1,8 +1,4 @@
-const Promo = Object.freeze({
-  FreeRide: 'free',
-  Percentage: 'p',
-  Fixed: 'f'
-});
+
 const Status = Object.freeze({
   Active: 'active',
   Sent: 'sent',
@@ -18,12 +14,7 @@ const Status = Object.freeze({
   InActive: 'inactive',
   New: 'new',
   Archived: 'archived',
-  Surveyed: 'surveyed',
   WaitingForBids: 'waiting_for_bids',
-  Won: 'won',
-  Offered: 'offered',
-  Refunded: 'refunded',
-  Escrowed: 'escrowed',
   Paid: 'paid',
   NotPaid: 'not_paid',
   Scheduling: 'scheduling'
@@ -166,5 +157,4 @@ module.exports = {
   Ratings,
   JobTypes,
   ScheduleTypes,
-  Promo
 };
