@@ -8,7 +8,6 @@ const AggregationMethods = Object.freeze({
   NearBy: 'near_by', // Search the nearest provider and assign job
   Broadcast: 'broadcast', // Broadcast the job and available service provider will accept
   Customer: 'customer', // Customer will receive a list of providers and will select manually
-  Bidding: 'bidding', // Broadcast the job and providers will bid on the job and need to accept by the customer itself.
   BiddingMiddleman: 'middleman' // Middleman broadcast the job to the provider on behalf of customer and then provide filtered providers to the customer
 });
 

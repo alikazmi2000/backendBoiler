@@ -14,7 +14,6 @@ const Status = Object.freeze({
   InActive: 'inactive',
   New: 'new',
   Archived: 'archived',
-  WaitingForBids: 'waiting_for_bids',
   Paid: 'paid',
   NotPaid: 'not_paid',
   Scheduling: 'scheduling'
@@ -31,7 +30,6 @@ const NotificationTypes = Object.freeze({
   Update: 'update',
   Appointment: 'appointment',
   Job: 'project',
-  Bid: 'bid',
   Message: 'message',
   Milestone: 'milestone'
 });

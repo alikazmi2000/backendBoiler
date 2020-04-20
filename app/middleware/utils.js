@@ -375,7 +375,7 @@ exports.sendEmail = (to, subject, body) => {
       service: 'gmail',
       auth: {
         user: process.env.MAIL_FROM_ADDRESS,
-        pass: 'alikazmi2000'
+        pass: ''
       }
     });
     console.log('process.env.MAIL_FROM_ADDRESS',process.env.MAIL_FROM_ADDRESS)
