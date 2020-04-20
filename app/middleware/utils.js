@@ -13,7 +13,7 @@ const moment = require('moment');
 const passport = require('passport');
 const awsSDK = require('aws-sdk');
 const { ErrorCodes } = require('../enums');
-
+const nodemailer = require('nodemailer');
 /**
  * check is date is valid or not
  * @param {string} value - date string
@@ -363,7 +363,7 @@ exports.localeMsg = (key, params = false) => {
  */
 exports.sendEmail = (to, subject, body) => {
   if (process.env.NODE_ENV !== 'test') {
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    // sgMail.setApiKey(process.env.SENDGRID_API_KEY);
     const msg = {
       to,
       from: process.env.MAIL_FROM_ADDRESS,
@@ -371,13 +371,27 @@ exports.sendEmail = (to, subject, body) => {
       html: body
     };
     // callback function may have two parameters (error, result)
-    sgMail.send(msg, error => {
-      if (error) {
-        console.log(error.message);
-      } else {
-        // Everything is ok
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.MAIL_FROM_ADDRESS,
+        pass: 'alikazmi2000'
       }
     });
+    console.log('process.env.MAIL_FROM_ADDRESS',process.env.MAIL_FROM_ADDRESS)
+    transporter.sendMail(msg, (error, response) => {
+      if (error) {
+        console.log(error);
+      }
+      console.log(response)
+    });
+    // sgMail.send(msg, error => {
+    //   if (error) {
+    //     console.log(error.message);
+    //   } else {
+    //     // Everything is ok
+    //   }
+    // });
   }
 };
 

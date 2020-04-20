@@ -215,15 +215,15 @@ exports.generateToken = async (user, role) => {
  */
 exports.setOTPItem = req => {
     return {
-      countryCode: req.country_code,
-      phoneNumber: req.phone_number,
-      code: req.code,
-      expiry: req.expiry,
-      token: req.token
+        countryCode: req.country_code,
+        phoneNumber: req.phone_number,
+        code: req.code,
+        expiry: req.expiry,
+        token: req.token
     };
-  };
- 
-  
+};
+
+
 
 /**
  * Checks if otp expired
@@ -231,15 +231,153 @@ exports.setOTPItem = req => {
  */
 exports.OTPIsExpired = async otp => {
     return new Promise((resolve, reject) => {
-      const minutes = moment(otp.expiry).diff(moment(), 'minutes');
-      console.log(minutes,'adasdadsad',otp)
-      if (minutes <= 0) {
-        reject(
-          utils.buildErrObject({ ...ErrorCodes.UNPROCESSABLE_ENTITY, message: 'USER.OTP_EXPIRED' })
-        );
+        const minutes = moment(otp.expiry).diff(moment(), 'minutes');
+        console.log(minutes, 'adasdadsad', otp)
+        if (minutes <= 0) {
+            reject(
+                utils.buildErrObject({ ...ErrorCodes.UNPROCESSABLE_ENTITY, message: 'USER.OTP_EXPIRED' })
+            );
+        }
+
+        resolve(true);
+    });
+};
+
+
+/**
+* Send Signup Email
+* @param {Object} param - parameters to send in email template
+*/
+exports.sendSignUpEmail = async param => {
+    const template = await utils.emailTemplate('signup');
+    mustache.parse(template);
+    utils.sendEmail(param.email, 'EMAIL.ACCOUNT_SIGNUP', mustache.render(template, param));
+};
+
+exports.resUserBasic = req => {
+    return {
+        id: req._id,
+        first_name: req.firstName,
+        last_name: req.lastName,
+        role: req.role,
+        phone_number: `${req.countryCode}-${req.phoneNumber}`,
+        email: req.email,
+        profile_picture: utils.fileFullUrl(req.profilePicture),
+        profile_picture_base: req.profilePicture,
+        is_email_verified: req.isEmailVerified,
+        status: req.status,
+        created_at: req.createdAt,
+        country_code:req.countryCode,
+    };
+};
+/**
+ * Is User Exists
+ * @param {Object} user - user object
+ */
+exports.userIsExists = user => {
+    return new Promise((resolve, reject) => {
+        if (!user) {
+            reject(utils.buildErrObject({ ...ErrorCodes.INVALID_CREDENTIALS }));
+        } else {
+            resolve(true);
+        }
+    });
+};
+
+
+/**
+ * Checks if blockExpires from user is greater than now
+ * @param {Object} user - user object
+ * @param {string} role - user role
+ */
+exports.userIsBlocked = async (user, role = Roles.Admin) => {
+    return new Promise((resolve, reject) => {
+      if ((user.status === Status.Blocked || user.status === Status.InActive) && user.role === role) {
+        if (user.blockExpires > new Date()) {
+          reject(utils.buildErrObject({ ...ErrorCodes.FORBIDDEN, message: 'USER.BLOCKED_TEMP' }));
+        } else {
+          reject(utils.buildErrObject({ ...ErrorCodes.FORBIDDEN, message: 'USER.BLOCKED' }));
+        }
+      } else {
+        resolve(true);
       }
-  
-      resolve(true);
     });
   };
+
+/**
+ * Blocks a user by setting blockExpires to the specified date based on constant HOURS_TO_BLOCK
+ * @param {Object} user - user object
+ */
+exports.blockUser = async user => {
+    return new Promise((resolve, reject) => {
+      user.blockExpires = addMinutes(new Date(), MINUTES_TO_BLOCK);
+      user.save((err, result) => {
+        if (err) {
+          reject(utils.buildErrObject({ ...ErrorCodes.INTERNAL_SERVER_ERROR, info: err.message }));
+        }
+        if (result) {
+          resolve(utils.buildErrObject({ ...ErrorCodes.FORBIDDEN, message: 'USER.BLOCKED_TEMP' }));
+        }
+      });
+    });
+  };
+  
+/**
+ * Saves login attempts to database
+ * @param {Object} user - user object
+ */
+exports.saveLoginAttemptsToDB = async user => {
+    return new Promise((resolve, reject) => {
+      user.save((err, result) => {
+        if (err) {
+          reject(utils.buildErrObject({ ...ErrorCodes.INTERNAL_SERVER_ERROR, info: err.message }));
+        }
+        if (result) {
+          resolve(true);
+        }
+      });
+    });
+  };
+  
+
+/**
+ * Adds one attempt to loginAttempts, then compares loginAttempts with the constant LOGIN_ATTEMPTS, if is less returns wrong password, else returns blockUser function
+ * @param {Object} user - user object
+ */
+exports.passwordsDoNotMatch = async user => {
+    user.loginAttempts += 1;
+    await this.saveLoginAttemptsToDB(user);
+    return new Promise((resolve, reject) => {
+      if (user.loginAttempts <= LOGIN_ATTEMPTS) {
+        resolve(utils.buildErrObject({ ...ErrorCodes.INVALID_CREDENTIALS }));
+      } else {
+        resolve(this.blockUser(user));
+      }
+      reject(utils.buildErrObject({ ...ErrorCodes.INVALID_CREDENTIALS }));
+    });
+  };
+
+
+/**
+ * Saves a new user access and then returns token
+ * @param {Object} req - request object (it should have "req.role" property)
+ * @param {Object} user - user object
+ * @param {string} role - user role
+ */
+exports.saveUserAccessAndReturnToken = async (req, user, role) => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const userInfo = utils.setInfo(user, this.resUserBasic);
+        userInfo.role = role;
+        // Returns data with access token
+        resolve({
+          token: await this.generateToken(user, role),
+          user: userInfo
+        });
+      } catch (err) {
+        reject(utils.buildErrObject({ ...ErrorCodes.INTERNAL_SERVER_ERROR, info: err.message }));
+      }
+    });
+  };
+  
   

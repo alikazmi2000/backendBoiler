@@ -38,7 +38,7 @@ router.post(
   trimRequest.all,
   userValidate.verifyPhone,
   userCtrl.verifyPhone
-  );
+);
 
 
 /*
@@ -51,5 +51,36 @@ router.post(
   userCtrl.verifyOTPCode
 );
 
+
+/*
+ * Send verification code route
+ */
+router.post(
+  '/verify_email',
+  requireAuth,
+  trimRequest.all,
+  userCtrl.sendVerificationCode
+);
+
+/*
+* Verify email code route
+*/
+router.post(
+  '/verify_email_code',
+  requireAuth,
+  trimRequest.all,
+  userValidate.verifyEmailCode,
+  userCtrl.verifyEmail
+);
+
+/*
+ * Login with phone route
+ */
+router.post(
+  '/login_with_phone',
+  trimRequest.all,
+  userValidate.loginPhone,
+  userCtrl.login
+);
 
 module.exports = router;

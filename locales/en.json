@@ -91,7 +91,8 @@
 		"DOCUMENT_EXPIRY_MISSING": "Document {{document}} or its expiry is missing.",
 		"CATEGORIES_ADD_SUCCESS": "Categories added Successfully.",
 		"CATEGORIES_ADD_ERROR": "Unable to add the categories.",
-		"INVALID_NUMBER": "Phone Number does not exist"
+		"INVALID_NUMBER": "Phone Number does not exist",
+		"EMAIL_NOT_EXIST": "Dear user your email doesn't exists kindly first register email"
 
 	},
 	"OTHER": {

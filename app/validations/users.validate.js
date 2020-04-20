@@ -85,3 +85,51 @@ exports.verifyOTPCode = [
     validationResult(req, res, next);
   }
 ];
+
+
+/**
+ * Email verification code
+ */
+exports.verifyEmailCode = [
+  check('verification_code')
+    .exists()
+    .withMessage('MISSING')
+    .not()
+    .isEmpty()
+    .withMessage('IS_EMPTY'),
+  (req, res, next) => {
+    validationResult(req, res, next);
+  }
+];
+
+/**
+ * Validates login with phone request
+ */
+exports.loginPhone = [
+  check('phone_number')
+    .exists()
+    .withMessage('MISSING')
+    .not()
+    .isEmpty()
+    .withMessage('IS_EMPTY'),
+  check('password')
+    .exists()
+    .withMessage('MISSING')
+    .not()
+    .isEmpty()
+    .withMessage('IS_EMPTY')
+    .isLength({
+      min: 5
+    }),
+  check('role')
+    .exists()
+    .withMessage('MISSING')
+    .not()
+    .isEmpty()
+    .withMessage('IS_EMPTY')
+    .isIn(Object.values(Roles))
+    .withMessage('ERROR.INCORRECT_ROLE'),
+  (req, res, next) => {
+    validationResult(req, res, next);
+  }
+];

@@ -118,9 +118,9 @@ exports.verifyOTPCode = async (req, res) => {
         ) {
             await db.updateItemsByQuery({ ...phoneObj }, Otp, { token });
         } else {
-            console.log('adadcz',query)
+            console.log('adadcz', query)
             const doesCodeExists = await db.getItemByQuery(query, Otp, false);
-            console.log(doesCodeExists,'adasdad')
+            console.log(doesCodeExists, 'adasdad')
             if (!doesCodeExists) {
                 utils.handleError(
                     req,
@@ -142,3 +142,135 @@ exports.verifyOTPCode = async (req, res) => {
         utils.handleError(req, res, error);
     }
 };
+
+/**
+ * Sending verification code
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ */
+exports.sendVerificationCode = async (req, res) => {
+    try {
+        const userId = utils.getAuthUserId(req);
+        req.code = utils.randomNum();
+        req.expiry = moment().add(process.env.EMAIL_EXPIRATION_IN_MINUTES, 'minutes');
+        req.userId = userId;
+        const query = {
+            $set: {
+                emailConfirmationCode: req.code,
+                emailConfirmationCodeExpiry: req.expiry,
+                isEmailVerified: false
+            }
+        };
+        const item = await db.updateItem(userId, User, query);
+        if (typeof item.email === 'undefined')
+            utils.handleError(req, res, {}, 'USER.EMAIL_NOT_EXIST');
+        else {
+            usersService.sendSignUpEmail({
+                email: item.email,
+                firstName: item.firstName,
+                verificationCode: req.code
+            });
+            let info;
+            if (process.env.NODE_ENV === 'test') {
+                info = { code: req.code };
+            } else {
+                info = utils.setInfo(item, usersService.resUserBasic);
+            }
+            utils.handleSuccess(res, 'USER.VERIFICATION_CODE_SUCCESS', info);
+
+        }
+    } catch (error) {
+        utils.handleError(req, res, error, 'USER.VERIFICATION_CODE_ERROR');
+    }
+};
+
+/**
+ * Verify email code
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ */
+exports.verifyEmail = async (req, res) => {
+    try {
+        const userId = utils.getAuthUserId(req);
+        const data = matchedData(req);
+        const user = await db.getItem(userId, User);
+        const currentTime = moment();
+
+        if (user.isEmailVerified) {
+            utils.handleSuccess(res, 'USER.EMAIL_ALREADY_VERIFIED', {});
+            return;
+        }
+        if (
+            !(
+                data.verification_code === user.emailConfirmationCode &&
+                user.emailConfirmationCodeExpiry > currentTime
+            )
+        ) {
+            utils.handleError(
+                req,
+                res,
+                utils.buildErrObject({
+                    ...ErrorCodes.INTERNAL_SERVER_ERROR,
+                    message: 'USER.VERIFICATION_CODE_EXPIRED_INVALID'
+                })
+            );
+            return;
+        }
+
+        // Setting email to verified
+        await db.updateItem(userId, User, {
+            isEmailVerified: true,
+            emailConfirmationCode: '',
+            emailConfirmationCodeExpiry: ''
+        });
+
+        utils.handleSuccess(res, 'USER.EMAIL_VERIFIED_SUCCESSFULLY', {});
+    } catch (error) {
+        utils.handleError(req, res, error);
+    }
+};
+
+/**
+ * Login function called by route
+ * @param {Object} req - request object
+ * @param {Object} res - response object
+ */
+// eslint-disable-next-line complexity
+exports.login = async (req, res) => {
+    try {
+        let data = matchedData(req);
+        let user;
+        if (typeof data.phone_number !== 'undefined') {
+            data = await utils.splitPhoneNumber(data);
+            const query = {
+                countryCode: data.country_code,
+                phoneNumber: data.phone_number,
+                role: data.role
+            };
+            user = await db.getItemByQuery(query, User, false);
+        } else {
+            const query = { email: data.email, role: data.role };
+            user = await db.getItemByQuery(query, User, false);
+        }
+        await usersService.userIsExists(user);
+        await usersService.userIsBlocked(user, data.role);
+        // await usersService.checkLoginAttemptsAndBlockExpires(user);
+        const isPasswordMatch = await auth.checkPassword(data.password, user);
+        if (!isPasswordMatch) {
+            utils.handleError(req, res, await usersService.passwordsDoNotMatch(user));
+        } else {
+            // all ok, save access and return token
+            user.loginAttempts = 0;
+            await usersService.saveLoginAttemptsToDB(user);
+            const userInfo = await usersService.saveUserAccessAndReturnToken(req, user, data.role);
+            utils.handleSuccess(res, 'USER.LOGIN_SUCCESS', userInfo.user, userInfo.token);
+        }
+    } catch (error) {
+        // Setting actual message for the api consumer
+        if (error.message === 'USER.NOT_EXIST') {
+            error.message = 'ERROR.INVALID_CREDENTIALS';
+        }
+        utils.handleError(req, res, error, 'USER.LOGIN_ERROR');
+    }
+};
+
