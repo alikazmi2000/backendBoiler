@@ -1,5 +1,5 @@
 const passport = require('passport');
-const User = require('../app/models/user');
+// const User = require('../app/models/user');
 const auth = require('../app/middleware/auth');
 const JwtStrategy = require('passport-jwt').Strategy;
 
@@ -43,16 +43,17 @@ const jwtOptions = {
  */
 const jwtLogin = new JwtStrategy(jwtOptions, (payload, done) => {
   const query = { _id: payload.data._id, role: payload.data.role };
-  User.findOne(query, '', (err, user) => {
-    if (err) {
-      return done(err, false);
-    }
-    if (!user) {
-      return done(null, false);
-    }
-    user.role = payload.data.role;
-    return done(null, user);
-  });
+  return done({})
+  // User.findOne(query, '', (err, user) => {
+  //   if (err) {
+  //     return done(err, false);
+  //   }
+  //   if (!user) {
+  //     return done(null, false);
+  //   }
+  //   user.role = payload.data.role;
+  //   return done(null, user);
+  // });
 });
 
 passport.use(jwtLogin);

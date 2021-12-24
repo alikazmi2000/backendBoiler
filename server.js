@@ -13,6 +13,7 @@ const initMongo = require('./config/mongo');
 const path = require('path');
 const cluster = require('cluster');
 const os = require('os');
+const sequelize = require('./config/mysql');
 
 // Setup express server port from ENV, default: 3000
 app.set('port', process.env.PORT || 3000);
@@ -49,7 +50,7 @@ app.use(i18n.init);
 
 // Init all other stuff
 app.use(cors());
-app.use(passport.initialize());
+// app.use(passport.initialize());
 app.use(compression());
 app.use(helmet());
 app.use(fileUpload());
@@ -57,36 +58,47 @@ app.use(express.static('public'));
 app.set('views', path.join(__dirname, 'views'));
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
-app.use(require('./app/routes'));
+let routes = require('./app/routes');
+app.use(routes);
 
 // Multicore enabled by env variable
 let server;
-if (process.env.USE_MULTICORE === 'true') {
-  // Init Multicore Server
-  const numCPUs = os.cpus().length;
-  if (cluster.isMaster) {
-    // Fork workers.
-    for (let i = 0; i < numCPUs; i++) {
-      cluster.fork();
-    }
-    // paramters (worker, code, signal)
-    cluster.on('exit', worker => {
-      console.log(`worker ${worker.process.pid} died`);
-    });
-  } else {
-    server = app.listen(app.get('port'));
-  }
-} else {
-  server = app.listen(app.get('port'));
-}
 
+sequelize
+  //.sync({force : true})
+  .sync()
+  .then(() => {
+    if (process.env.USE_MULTICORE === 'true') {
+      // Init Multicore Server
+      const numCPUs = os.cpus().length;
+      if (cluster.isMaster) {
+        // Fork workers.
+        for (let i = 0; i < numCPUs; i++) {
+          cluster.fork();
+        }
+        // paramters (worker, code, signal)
+        cluster.on('exit', worker => {
+          console.log(`worker ${worker.process.pid} died`);
+        });
+      } else {
+        server = app.listen(app.get('port'));
+      }
+    } else {
+      server = app.listen(app.get('port'));
+    }
+    //pending set timezone
+    console.log("App listening on port " + process.env.PORT);
+  })
+  .catch(err => {
+    console.log(err);
+  });
 // Init MongoDB
-initMongo();
+// initMongo();
 
 // Init Sockets
-const io = require('socket.io')(server);
-require('./app/events/socket.events')(io);
+// const io = require('socket.io')(server);
+// require('./app/events/socket.events')(io);
 
 // Requiring All Event listeners
-require('./app/events');
+// require('./app/events');
 module.exports = app; // for testing

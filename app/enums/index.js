@@ -22,34 +22,9 @@ const Status = Object.freeze({
 const Roles = Object.freeze({
   SuperAdmin: 'super_admin',
   Admin: 'admin',
-  Seeker: 'seeker',
-  Giver: 'giver',
 });
 
-const NotificationTypes = Object.freeze({
-  Update: 'update',
-  Appointment: 'appointment',
-  Job: 'project',
-  Message: 'message',
-  Milestone: 'milestone'
-});
 
-const ReviewTypes = Object.freeze({
-  Quality: 'quality',
-  Payment: 'payment'
-});
-
-const QuestionTypes = Object.freeze({
-  Text: 'text',
-  Sliding: 'slider',
-  File: 'file',
-  FileDoc: 'file_doc'
-});
-
-const StripeBankAccountHolderType = Object.freeze({
-  Individual: 'individual',
-  Business: 'business'
-});
 
 const DeviceTypes = Object.freeze({
   Web: 'web',
@@ -57,33 +32,7 @@ const DeviceTypes = Object.freeze({
   IOS: 'ios'
 });
 
-const CreditCardTypes = Object.freeze({
-  Amex: 'amex',
-  Diners: 'diners',
-  Discover: 'discover',
-  JCB: 'jcb',
-  MasterCard: 'mastercard',
-  UnionPay: 'unionpay',
-  Visa: 'visa'
-});
 
-const UploadTypes = Object.freeze({
-  User: 'user',
-  Job: 'job',
-  Category: 'category'
-});
-
-const JobTypes = Object.freeze({
-  Hourly: 'hourly',
-  Fixed: 'fixed'
-});
-
-const ScheduleTypes = Object.freeze({
-  SMS: 'sms',
-  Phone: 'phone'
-});
-
-const Ratings = [1, 2, 3, 4, 5];
 
 const ErrorCodes = Object.freeze({
   INTERNAL_SERVER_ERROR: { httpStatus: 500, code: 0, message: 'ERROR.INTERNAL_SERVER_ERROR' },
@@ -144,15 +93,6 @@ const ErrorCodes = Object.freeze({
 module.exports = {
   Status,
   Roles,
-  NotificationTypes,
-  ReviewTypes,
-  QuestionTypes,
   ErrorCodes,
-  StripeBankAccountHolderType,
   DeviceTypes,
-  CreditCardTypes,
-  UploadTypes,
-  Ratings,
-  JobTypes,
-  ScheduleTypes,
 };

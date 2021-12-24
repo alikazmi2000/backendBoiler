@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const auth = require('./auth');
 const logger = require('../../config/winston');
 const requestIp = require('request-ip');
@@ -14,6 +15,7 @@ const passport = require('passport');
 const awsSDK = require('aws-sdk');
 const { ErrorCodes } = require('../enums');
 const nodemailer = require('nodemailer');
+const User = require("../models/User")
 /**
  * check is date is valid or not
  * @param {string} value - date string
@@ -330,6 +332,31 @@ exports.requireAuth = (req, res, next) => {
   )(req, res, next);
 };
 
+exports.authenticate = async (req, res, next) => {
+  try {
+    const token = req.header("Token");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log(decoded,'asdasdas');
+
+    const data = await User().findByPk(decoded.id);
+    req.user = data;
+    req.token = token;
+    if (data) {
+      next();
+    }
+    else {
+      return res.status(401).send({
+        status: "Error",
+        message: "User not authorized",
+      });
+    }
+  } catch (error) {
+    return res.status(401).send({
+      status: "Error",
+      message: "User not authorized",
+    });
+  }
+}
 /**
  * Generate random number with specific length
  * @param {Number} n length on random numbers
@@ -378,7 +405,7 @@ exports.sendEmail = (to, subject, body) => {
         pass: ''
       }
     });
-    console.log('process.env.MAIL_FROM_ADDRESS',process.env.MAIL_FROM_ADDRESS)
+    console.log('process.env.MAIL_FROM_ADDRESS', process.env.MAIL_FROM_ADDRESS)
     transporter.sendMail(msg, (error, response) => {
       if (error) {
         console.log(error);
@@ -963,7 +990,9 @@ exports.hashedPassword = password => {
     });
   });
 };
-
+exports.createPasswordHash = (value) => {
+  return crypto.createHmac('sha256', "MobIns-Secure-P_n_g!@#").update(value).digest('hex');
+}
 /**
  * Checks User is authorized for this action or not
  * @param {string} myUserId - logged-in user
